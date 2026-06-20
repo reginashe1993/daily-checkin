@@ -49,6 +49,7 @@
   .error-msg { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; color: #993C1D; font-size: 13px; line-height: 1.8; }
   .sync-btn { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 16px; transition: all 0.15s; }
   .sync-btn:hover { border-color: var(--purple); color: var(--purple); }
+  .sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
@@ -63,13 +64,13 @@
     <a class="nav-btn active" href="stats.html">📊 成长总结</a>
   </div>
 
-  <button class="sync-btn" onclick="loadData()">
+  <button class="sync-btn" id="sync-btn" onclick="loadData()">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
     刷新数据
   </button>
 
   <div id="main-content">
-    <div class="loading">正在读取数据…</div>
+    <div class="loading">正在从 Google Sheets 读取数据…</div>
   </div>
 </div>
 
@@ -81,36 +82,50 @@ let charts = [];
 let currentPeriod = '30';
 
 async function loadData() {
+  const btn = document.getElementById('sync-btn');
+  btn.disabled = true;
+  btn.textContent = '读取中…';
   document.getElementById('data-range').textContent = '加载中…';
   document.getElementById('main-content').innerHTML = '<div class="loading">正在从 Google Sheets 读取数据…</div>';
   charts.forEach(c => c.destroy());
   charts = [];
 
   try {
-    const resp = await fetch(SCRIPT_URL + '?action=read', { method: 'GET', mode: 'no-cors' });
-    // no-cors can't read response body, so fall back to local data
-    throw new Error('use local');
-  } catch(e) {
-    // Fall back to localStorage data
-    const stored = JSON.parse(localStorage.getItem('growth-log') || '[]');
-    if (stored.length === 0) {
+    const resp = await fetch(SCRIPT_URL, { method: 'GET' });
+    const rows = await resp.json();
+
+    if (!Array.isArray(rows) || rows.length === 0) {
       document.getElementById('data-range').textContent = '暂无数据';
-      document.getElementById('main-content').innerHTML = '<div class="error-msg">还没有记录，先去每日打卡保存几条记录吧 😊<br><br>数据会自动从本地读取。</div>';
+      document.getElementById('main-content').innerHTML = '<div class="error-msg">还没有记录，先去每日打卡保存几条记录吧 😊</div>';
+      btn.disabled = false;
+      btn.innerHTML = '↻ 刷新数据';
       return;
     }
-    allData = stored.map(r => ({
-      date: r.date,
-      dayType: r.dayType,
-      done: r.done,
-      total: r.total,
-      pct: r.pct,
-      body: r.anchors?.body || false,
-      input: r.anchors?.input || false,
-      record: r.anchors?.record || false,
-    })).reverse();
-    document.getElementById('data-range').textContent = `共 ${allData.length} 条记录（本地数据）`;
+
+    allData = rows.map(r => ({
+      date: r['日期'] || '',
+      dayType: r['日类型'] || '',
+      done: Number(r['完成项目数'] || 0),
+      total: Number(r['总项目数'] || 0),
+      pct: parseFloat((r['完成率'] || '0').toString().replace('%', '')),
+      body: r['身体锚'] === '✓',
+      input: r['输入锚'] === '✓',
+      record: r['记录锚'] === '✓',
+    })).filter(r => r.date);
+
+    document.getElementById('data-range').textContent = `共 ${allData.length} 条记录，来自 Google Sheets`;
     renderAll();
+  } catch(e) {
+    document.getElementById('data-range').textContent = '读取失败';
+    document.getElementById('main-content').innerHTML = `
+      <div class="error-msg">
+        读取失败，可能是 Apps Script 还没重新部署。<br><br>
+        请确认：Extensions → Apps Script → Deploy → Manage deployments → 编辑 → New version → Deploy
+      </div>`;
   }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg> 刷新数据';
 }
 
 function getFiltered() {
@@ -188,7 +203,7 @@ function renderAll() {
     </div>
   `;
 
-  const labels = d.map(r => r.date.replace(/\d{4}年/, '').replace('日', '').replace('星期', ' ').trim());
+  const labels = d.map(r => r.date.replace(/\d{4}年/, '').replace('日', '').replace(/星期./, '').trim());
   const ctx = document.getElementById('trend-chart').getContext('2d');
   const chart = new Chart(ctx, {
     type: 'line',
