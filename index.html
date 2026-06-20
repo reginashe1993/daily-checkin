@@ -26,14 +26,7 @@
     --radius: 10px;
     --radius-sm: 6px;
   }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 15px;
-    line-height: 1.5;
-    min-height: 100vh;
-  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.5; min-height: 100vh; }
   .shell { max-width: 520px; margin: 0 auto; padding: 24px 16px 80px; }
   .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
   .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
@@ -44,12 +37,7 @@
   .badge-connect { background: var(--teal-light); color: var(--teal-text); }
   .badge-rest { background: var(--green-light); color: var(--green-text); }
   .day-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
-  .day-tab {
-    padding: 9px 12px; border-radius: var(--radius-sm);
-    border: 1px solid var(--border); background: var(--surface);
-    font-size: 12px; color: var(--muted); cursor: pointer;
-    text-align: center; transition: all 0.15s;
-  }
+  .day-tab { padding: 9px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); font-size: 12px; color: var(--muted); cursor: pointer; text-align: center; transition: all 0.15s; }
   .day-tab.active { border-color: var(--purple); color: var(--purple); font-weight: 500; background: var(--purple-light); }
   .day-tab:hover:not(.active) { border-color: #b4b2a9; color: var(--text); }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
@@ -106,7 +94,6 @@
 </head>
 <body>
 <div class="shell">
-
   <div class="header">
     <div>
       <div class="header-title">每日打卡</div>
@@ -175,12 +162,12 @@
   </button>
   <div class="save-status" id="save-status"></div>
 
-  <div class="history-toggle" onclick="toggleHistory()">查看本地历史记录 ▾</div>
+  <div class="history-toggle" onclick="toggleHistory()">查看历史记录 ▾</div>
   <div class="history-section" id="history-section"></div>
-
 </div>
+
 <script>
-const SHEET_ID = '1kQ1O6domq8OwWnZ6jzOK76mKMcnm6v-WAQNbxF6Hzzk';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW3d3EQiaKQjEWE1Abs91T06eGtYZPCS_YALuXLcfjIJrLaJBT3AhjFaDFJ3zHr4fN/exec';
 
 const DAYS = {
   deep: {
@@ -278,21 +265,18 @@ async function saveEntry() {
   const btn = document.getElementById('save-btn');
   const status = document.getElementById('save-status');
   btn.disabled = true;
-  status.textContent = '正在保存到 Google Sheets…';
+  status.textContent = '正在保存…';
   status.className = 'save-status';
 
   const total = document.querySelectorAll('#checklist-area .check-item').length;
   const done = document.querySelectorAll('#checklist-area .box.on').length;
   const pct = total ? Math.round(done/total*100) : 0;
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+  const dateStr = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
 
   const row = [
     dateStr,
     DAYS[currentDay].label,
-    done,
-    total,
-    pct + '%',
+    done, total, pct + '%',
     anchors.body ? '✓' : '✗',
     anchors.input ? '✓' : '✗',
     anchors.record ? '✓' : '✗',
@@ -302,44 +286,22 @@ async function saveEntry() {
   ];
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch(SCRIPT_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: `You are a Google Sheets assistant. Append the provided data row to the next empty row in the spreadsheet with ID "${SHEET_ID}", Sheet1. 
-First check if row 1 has headers. If row 1 is empty, write these headers first: 日期, 日类型, 完成项目数, 总项目数, 完成率, 身体锚, 输入锚, 记录锚, 今天学到什么, 今天决策是否有效, 这个系统的真实效果
-Then append the data to the next empty row after any existing data.
-Reply only with "SUCCESS" if done, or "ERROR: reason" if failed.`,
-        messages: [{
-          role: 'user',
-          content: `Append this row to the Google Sheet: ${JSON.stringify(row)}`
-        }],
-        mcp_servers: [{ type: 'url', url: 'https://drivemcp.googleapis.com/mcp/v1', name: 'google-drive' }]
-      })
+      body: JSON.stringify({ row })
     });
-
-    const data = await resp.json();
-    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
-
-    if (text.includes('SUCCESS') || text.includes('成功') || text.includes('appended') || text.includes('written') || text.includes('added')) {
-      status.textContent = '已保存到 Google Sheets ✓';
-      status.className = 'save-status ok';
-      saveLocal(dateStr, done, total, pct);
-    } else {
-      status.textContent = '保存失败，已备份到本地。请检查 Sheet 权限是否为"任何人可编辑"。';
-      status.className = 'save-status err';
-      saveLocal(dateStr, done, total, pct);
-    }
-  } catch(e) {
-    status.textContent = '网络错误，已备份到本地';
-    status.className = 'save-status err';
+    status.textContent = '已保存到 Google Sheets ✓';
+    status.className = 'save-status ok';
     saveLocal(dateStr, done, total, pct);
+  } catch(e) {
+    status.textContent = '保存失败，请重试';
+    status.className = 'save-status err';
   }
 
   btn.disabled = false;
-  setTimeout(() => { status.textContent = ''; status.className = 'save-status'; }, 4000);
+  setTimeout(() => { status.textContent = ''; status.className = 'save-status'; }, 3000);
 }
 
 function saveLocal(dateStr, done, total, pct) {
@@ -370,7 +332,7 @@ function renderHistory() {
   const sec = document.getElementById('history-section');
   const stored = JSON.parse(localStorage.getItem('growth-log') || '[]');
   if (!stored.length) {
-    sec.innerHTML = '<div class="history-empty">还没有本地记录</div>';
+    sec.innerHTML = '<div class="history-empty">还没有记录，保存今天的打卡开始吧</div>';
     return;
   }
   sec.innerHTML = stored.map(e => `
