@@ -8,63 +8,51 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --bg: #f7f6f2;
-    --surface: #ffffff;
-    --border: #e4e2da;
-    --text: #1a1a18;
-    --muted: #888780;
-    --hint: #b4b2a9;
-    --purple: #534AB7;
-    --purple-light: #EEEDFE;
-    --purple-text: #3C3489;
-    --teal: #1D9E75;
-    --teal-light: #E1F5EE;
-    --teal-text: #085041;
-    --radius: 10px;
-    --radius-sm: 6px;
+    --bg: #f7f6f2; --surface: #ffffff; --border: #e4e2da;
+    --text: #1a1a18; --muted: #888780; --hint: #b4b2a9;
+    --purple: #534AB7; --purple-light: #EEEDFE; --purple-text: #3C3489;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-text: #085041;
+    --radius: 10px; --radius-sm: 6px;
   }
   body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.5; min-height: 100vh; }
   .shell { max-width: 520px; margin: 0 auto; padding: 24px 16px 80px; }
   .header { margin-bottom: 20px; }
   .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
   .header-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
-  .nav-bar { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
-  .nav-btn { flex: 1; padding: 9px; font-size: 13px; text-align: center; cursor: pointer; background: var(--surface); color: var(--muted); text-decoration: none; display: block; }
+  .nav-bar { display: flex; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+  .nav-btn { flex: 1; padding: 9px; font-size: 13px; text-align: center; background: var(--surface); color: var(--muted); text-decoration: none; display: block; }
   .nav-btn.active { background: var(--purple-light); color: var(--purple); font-weight: 500; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
   .card-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hint); margin-bottom: 14px; }
-  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px; }
+  .stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 4px; }
   .stat-box { background: var(--bg); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; }
   .stat-num { font-size: 26px; font-weight: 600; color: var(--purple); letter-spacing: -0.5px; }
   .stat-label { font-size: 11px; color: var(--muted); margin-top: 2px; }
-  .anchor-row { display: flex; flex-direction: column; gap: 10px; }
+  .anchor-row { display: flex; flex-direction: column; gap: 12px; }
   .anchor-item { display: flex; align-items: center; gap: 12px; }
   .anchor-emoji { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
   .anchor-info { flex: 1; }
-  .anchor-name { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+  .anchor-name { font-size: 13px; font-weight: 500; margin-bottom: 5px; }
   .anchor-bar-bg { height: 6px; background: var(--bg); border-radius: 3px; }
   .anchor-bar-fill { height: 6px; border-radius: 3px; transition: width 0.6s ease; }
   .anchor-pct { font-size: 11px; color: var(--muted); margin-top: 3px; }
   .day-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .day-tile { background: var(--bg); border-radius: var(--radius-sm); padding: 12px; }
   .day-tile-top { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
-  .day-tile-emoji { font-size: 16px; }
   .day-tile-name { font-size: 12px; font-weight: 500; }
-  .day-tile-count { font-size: 22px; font-weight: 600; color: var(--purple); }
+  .day-tile-count { font-size: 24px; font-weight: 600; color: var(--purple); }
   .day-tile-sub { font-size: 11px; color: var(--muted); }
   .period-tabs { display: flex; gap: 6px; margin-bottom: 14px; }
   .period-tab { font-size: 11px; padding: 4px 10px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; }
   .period-tab.active { background: var(--purple); border-color: var(--purple); color: #fff; font-weight: 500; }
   .loading { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
-  .error-msg { text-align: center; padding: 30px 0; color: #993C1D; font-size: 13px; }
-  .sync-btn { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 16px; }
+  .error-msg { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; color: #993C1D; font-size: 13px; line-height: 1.8; }
+  .sync-btn { width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 16px; transition: all 0.15s; }
   .sync-btn:hover { border-color: var(--purple); color: var(--purple); }
-  canvas { max-width: 100%; }
 </style>
 </head>
 <body>
 <div class="shell">
-
   <div class="header">
     <div class="header-title">成长总结</div>
     <div class="header-sub" id="data-range">加载中…</div>
@@ -81,71 +69,71 @@
   </button>
 
   <div id="main-content">
-    <div class="loading">正在从 Google Sheets 读取数据…</div>
+    <div class="loading">正在读取数据…</div>
   </div>
-
 </div>
 
 <script>
-const SHEET_ID = '1kQ1O6domq8OwWnZ6jzOK76mKMcnm6v-WAQNbxF6Hzzk';
-const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Sheet1`;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwW3d3EQiaKQjEWE1Abs91T06eGtYZPCS_YALuXLcfjIJrLaJBT3AhjFaDFJ3zHr4fN/exec';
 
 let allData = [];
-let chartInstances = [];
-let currentPeriod = '7';
+let charts = [];
+let currentPeriod = '30';
 
 async function loadData() {
   document.getElementById('data-range').textContent = '加载中…';
   document.getElementById('main-content').innerHTML = '<div class="loading">正在从 Google Sheets 读取数据…</div>';
-  chartInstances.forEach(c => c.destroy());
-  chartInstances = [];
+  charts.forEach(c => c.destroy());
+  charts = [];
 
   try {
-    const resp = await fetch(SHEET_URL);
-    const text = await resp.text();
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*?)\);/)[1]);
-    const rows = json.table.rows;
-
-    allData = rows.slice(1).map(r => ({
-      date: r.c[0]?.v || '',
-      dayType: r.c[1]?.v || '',
-      done: Number(r.c[2]?.v || 0),
-      total: Number(r.c[3]?.v || 0),
-      pct: parseFloat((r.c[4]?.v || '0').toString().replace('%', '')),
-      body: (r.c[5]?.v || '') === '✓',
-      input: (r.c[6]?.v || '') === '✓',
-      record: (r.c[7]?.v || '') === '✓',
-    })).filter(r => r.date);
-
-    if (allData.length === 0) {
-      document.getElementById('main-content').innerHTML = '<div class="error-msg">还没有数据，先去每日打卡保存几条记录吧 😊</div>';
+    const resp = await fetch(SCRIPT_URL + '?action=read', { method: 'GET', mode: 'no-cors' });
+    // no-cors can't read response body, so fall back to local data
+    throw new Error('use local');
+  } catch(e) {
+    // Fall back to localStorage data
+    const stored = JSON.parse(localStorage.getItem('growth-log') || '[]');
+    if (stored.length === 0) {
+      document.getElementById('data-range').textContent = '暂无数据';
+      document.getElementById('main-content').innerHTML = '<div class="error-msg">还没有记录，先去每日打卡保存几条记录吧 😊<br><br>数据会自动从本地读取。</div>';
       return;
     }
-
-    document.getElementById('data-range').textContent = `共 ${allData.length} 条记录`;
+    allData = stored.map(r => ({
+      date: r.date,
+      dayType: r.dayType,
+      done: r.done,
+      total: r.total,
+      pct: r.pct,
+      body: r.anchors?.body || false,
+      input: r.anchors?.input || false,
+      record: r.anchors?.record || false,
+    })).reverse();
+    document.getElementById('data-range').textContent = `共 ${allData.length} 条记录（本地数据）`;
     renderAll();
-  } catch(e) {
-    document.getElementById('main-content').innerHTML = `<div class="error-msg">读取失败，请确认 Google Sheet 已设置为"任何人可查看"<br><br>Sheet → Share → Anyone with the link → Viewer</div>`;
   }
 }
 
-function getFiltered(days) {
-  if (days === 'all') return allData;
-  return allData.slice(-parseInt(days));
+function getFiltered() {
+  if (currentPeriod === 'all') return allData;
+  return allData.slice(-parseInt(currentPeriod));
 }
 
 function renderAll() {
-  const d = getFiltered(currentPeriod);
+  const d = getFiltered();
   const total = d.length;
   const avgPct = total ? Math.round(d.reduce((s, r) => s + r.pct, 0) / total) : 0;
   const bodyCount = d.filter(r => r.body).length;
   const inputCount = d.filter(r => r.input).length;
   const recordCount = d.filter(r => r.record).length;
 
+  const dayDefs = [
+    { key: '🧠 深度成长日', emoji: '🧠', short: '深度成长日' },
+    { key: '🧩 系统管理日', emoji: '🧩', short: '系统管理日' },
+    { key: '🤝 对外连接日', emoji: '🤝', short: '对外连接日' },
+    { key: '🌿 低结构恢复日', emoji: '🌿', short: '低结构恢复日' },
+  ];
   const dayCounts = {};
-  const dayEmoji = { '🧠 深度成长日': '🧠', '🧩 系统管理日': '🧩', '🤝 对外连接日': '🤝', '🌿 低结构恢复日': '🌿' };
-  const dayShort = { '🧠 深度成长日': '深度成长日', '🧩 系统管理日': '系统管理日', '🤝 对外连接日': '对外连接日', '🌿 低结构恢复日': '低结构恢复日' };
-  Object.keys(dayEmoji).forEach(k => dayCounts[k] = 0);
+  dayDefs.forEach(dd => dayCounts[dd.key] = 0);
   d.forEach(r => { if (dayCounts[r.dayType] !== undefined) dayCounts[r.dayType]++; });
 
   document.getElementById('main-content').innerHTML = `
@@ -157,90 +145,63 @@ function renderAll() {
         <button class="period-tab ${currentPeriod==='all'?'active':''}" onclick="setPeriod('all')">全部</button>
       </div>
       <div class="stat-row">
-        <div class="stat-box">
-          <div class="stat-num">${total}</div>
-          <div class="stat-label">打卡天数</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num">${avgPct}%</div>
-          <div class="stat-label">平均完成率</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-num">${Math.round((bodyCount+inputCount+recordCount)/total/3*100)||0}%</div>
-          <div class="stat-label">锚点坚持率</div>
-        </div>
+        <div class="stat-box"><div class="stat-num">${total}</div><div class="stat-label">打卡天数</div></div>
+        <div class="stat-box"><div class="stat-num">${avgPct}%</div><div class="stat-label">平均完成率</div></div>
+        <div class="stat-box"><div class="stat-num">${total?Math.round((bodyCount+inputCount+recordCount)/total/3*100):0}%</div><div class="stat-label">锚点坚持率</div></div>
       </div>
     </div>
 
     <div class="card">
       <div class="card-label">完成率趋势</div>
-      <canvas id="trend-chart" height="180"></canvas>
+      <canvas id="trend-chart" height="160"></canvas>
     </div>
 
     <div class="card">
       <div class="card-label">三个锚点坚持情况</div>
       <div class="anchor-row">
-        <div class="anchor-item">
-          <div class="anchor-emoji">🏃</div>
-          <div class="anchor-info">
-            <div class="anchor-name">身体锚 · 运动</div>
-            <div class="anchor-bar-bg"><div class="anchor-bar-fill" style="width:${total?Math.round(bodyCount/total*100):0}%;background:#534AB7;"></div></div>
-            <div class="anchor-pct">${bodyCount} / ${total} 天 &nbsp;·&nbsp; ${total?Math.round(bodyCount/total*100):0}%</div>
-          </div>
-        </div>
-        <div class="anchor-item">
-          <div class="anchor-emoji">📖</div>
-          <div class="anchor-info">
-            <div class="anchor-name">输入锚 · 高质量阅读</div>
-            <div class="anchor-bar-bg"><div class="anchor-bar-fill" style="width:${total?Math.round(inputCount/total*100):0}%;background:#1D9E75;"></div></div>
-            <div class="anchor-pct">${inputCount} / ${total} 天 &nbsp;·&nbsp; ${total?Math.round(inputCount/total*100):0}%</div>
-          </div>
-        </div>
-        <div class="anchor-item">
-          <div class="anchor-emoji">✏️</div>
-          <div class="anchor-info">
-            <div class="anchor-name">记录锚 · 今日记录</div>
-            <div class="anchor-bar-bg"><div class="anchor-bar-fill" style="width:${total?Math.round(recordCount/total*100):0}%;background:#E8A020;"></div></div>
-            <div class="anchor-pct">${recordCount} / ${total} 天 &nbsp;·&nbsp; ${total?Math.round(recordCount/total*100):0}%</div>
-          </div>
-        </div>
+        ${[
+          { emoji: '🏃', name: '身体锚 · 运动', count: bodyCount, color: '#534AB7' },
+          { emoji: '📖', name: '输入锚 · 高质量阅读', count: inputCount, color: '#1D9E75' },
+          { emoji: '✏️', name: '记录锚 · 今日记录', count: recordCount, color: '#E8A020' },
+        ].map(a => `
+          <div class="anchor-item">
+            <div class="anchor-emoji">${a.emoji}</div>
+            <div class="anchor-info">
+              <div class="anchor-name">${a.name}</div>
+              <div class="anchor-bar-bg"><div class="anchor-bar-fill" style="width:${total?Math.round(a.count/total*100):0}%;background:${a.color};"></div></div>
+              <div class="anchor-pct">${a.count} / ${total} 天 · ${total?Math.round(a.count/total*100):0}%</div>
+            </div>
+          </div>`).join('')}
       </div>
     </div>
 
     <div class="card">
       <div class="card-label">日类型分布</div>
       <div class="day-grid">
-        ${Object.entries(dayCounts).map(([k, v]) => `
+        ${dayDefs.map(dd => `
           <div class="day-tile">
-            <div class="day-tile-top">
-              <span class="day-tile-emoji">${dayEmoji[k]}</span>
-              <span class="day-tile-name">${dayShort[k]}</span>
-            </div>
-            <div class="day-tile-count">${v}</div>
-            <div class="day-tile-sub">天 &nbsp;·&nbsp; ${total?Math.round(v/total*100):0}%</div>
-          </div>
-        `).join('')}
+            <div class="day-tile-top"><span style="font-size:16px">${dd.emoji}</span><span class="day-tile-name">${dd.short}</span></div>
+            <div class="day-tile-count">${dayCounts[dd.key]}</div>
+            <div class="day-tile-sub">天 · ${total?Math.round(dayCounts[dd.key]/total*100):0}%</div>
+          </div>`).join('')}
       </div>
     </div>
   `;
 
-  // Trend chart
-  const labels = d.map(r => r.date.replace('年','/').replace('月','/').replace('日','').replace(/星期.*/,'').trim());
-  const pcts = d.map(r => r.pct);
+  const labels = d.map(r => r.date.replace(/\d{4}年/, '').replace('日', '').replace('星期', ' ').trim());
   const ctx = document.getElementById('trend-chart').getContext('2d');
   const chart = new Chart(ctx, {
     type: 'line',
     data: {
       labels,
       datasets: [{
-        data: pcts,
+        data: d.map(r => r.pct),
         borderColor: '#534AB7',
         backgroundColor: 'rgba(83,74,183,0.08)',
         borderWidth: 2,
         pointBackgroundColor: '#534AB7',
-        pointRadius: pcts.length > 20 ? 2 : 4,
-        fill: true,
-        tension: 0.3
+        pointRadius: d.length > 20 ? 2 : 4,
+        fill: true, tension: 0.35
       }]
     },
     options: {
@@ -248,17 +209,17 @@ function renderAll() {
       plugins: { legend: { display: false } },
       scales: {
         y: { min: 0, max: 100, ticks: { callback: v => v+'%', font: { size: 11 } }, grid: { color: '#f0ede6' } },
-        x: { ticks: { font: { size: 10 }, maxRotation: 45, maxTicksLimit: 10 }, grid: { display: false } }
+        x: { ticks: { font: { size: 10 }, maxRotation: 45, maxTicksLimit: 8 }, grid: { display: false } }
       }
     }
   });
-  chartInstances.push(chart);
+  charts.push(chart);
 }
 
 function setPeriod(p) {
   currentPeriod = p;
-  chartInstances.forEach(c => c.destroy());
-  chartInstances = [];
+  charts.forEach(c => c.destroy());
+  charts = [];
   renderAll();
 }
 
