@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>每日成长打卡</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f7f6f2;
+    --surface: #ffffff;
+    --border: #e4e2da;
+    --text: #1a1a18;
+    --muted: #888780;
+    --hint: #b4b2a9;
+    --purple: #534AB7;
+    --purple-light: #EEEDFE;
+    --purple-text: #3C3489;
+    --teal: #1D9E75;
+    --teal-light: #E1F5EE;
+    --teal-text: #085041;
+    --blue-light: #E6F1FB;
+    --blue-text: #0C447C;
+    --green-light: #EAF3DE;
+    --green-text: #27500A;
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .shell { max-width: 520px; margin: 0 auto; padding: 24px 16px 80px; }
+  .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+  .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.3px; }
+  .header-date { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .day-badge { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; white-space: nowrap; margin-top: 4px; }
+  .badge-deep { background: var(--purple-light); color: var(--purple-text); }
+  .badge-system { background: var(--blue-light); color: var(--blue-text); }
+  .badge-connect { background: var(--teal-light); color: var(--teal-text); }
+  .badge-rest { background: var(--green-light); color: var(--green-text); }
+  .day-tabs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+  .day-tab {
+    padding: 9px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+    font-size: 12px; color: var(--muted); cursor: pointer;
+    text-align: center; transition: all 0.15s;
+  }
+  .day-tab.active { border-color: var(--purple); color: var(--purple); font-weight: 500; background: var(--purple-light); }
+  .day-tab:hover:not(.active) { border-color: #b4b2a9; color: var(--text); }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .card-label { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hint); margin-bottom: 12px; }
+  .time-row { display: flex; gap: 12px; }
+  .time-pill { font-size: 10px; font-weight: 600; color: var(--hint); min-width: 28px; padding-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .time-body { flex: 1; }
+  .time-heading { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 8px; }
+  .check-item { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--bg); cursor: pointer; user-select: none; }
+  .check-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .check-item:first-child { padding-top: 0; }
+  .box { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.12s; }
+  .box.on { background: var(--purple); border-color: var(--purple); }
+  .box.on::after { content: ''; display: block; width: 9px; height: 5px; border-left: 2px solid #fff; border-bottom: 2px solid #fff; transform: rotate(-45deg) translateY(-1px); }
+  .item-label { font-size: 13px; color: var(--text); flex: 1; line-height: 1.4; }
+  .item-label.done { color: var(--hint); text-decoration: line-through; }
+  .anchor-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .anchor-tile { background: var(--bg); border-radius: var(--radius-sm); padding: 10px; cursor: pointer; user-select: none; transition: background 0.12s; }
+  .anchor-tile.on { background: var(--teal-light); }
+  .anchor-icon { font-size: 18px; margin-bottom: 4px; }
+  .anchor-name { font-size: 10px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .anchor-desc { font-size: 11px; color: var(--muted); line-height: 1.3; }
+  .anchor-tile.on .anchor-name, .anchor-tile.on .anchor-desc { color: var(--teal-text); }
+  .reflect-label { font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 9px 11px; font-size: 13px; color: var(--text); background: var(--bg); resize: none; font-family: inherit; line-height: 1.5; outline: none; transition: border-color 0.12s; }
+  textarea::placeholder { color: var(--hint); }
+  textarea:focus { border-color: var(--purple); background: var(--surface); }
+  .reflect-row { margin-bottom: 12px; }
+  .reflect-row:last-child { margin-bottom: 0; }
+  .progress-wrap { margin-bottom: 16px; }
+  .progress-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .progress-num { font-size: 13px; font-weight: 500; }
+  .progress-pct { font-size: 11px; color: var(--muted); }
+  .bar-bg { height: 5px; background: var(--border); border-radius: 3px; }
+  .bar-fill { height: 5px; background: var(--purple); border-radius: 3px; transition: width 0.3s; }
+  .save-btn { width: 100%; padding: 12px; border-radius: var(--radius); border: none; background: var(--purple); color: #fff; font-size: 14px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+  .save-btn:hover { opacity: 0.88; }
+  .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .save-status { font-size: 12px; text-align: center; margin-top: 8px; min-height: 16px; color: var(--muted); }
+  .save-status.ok { color: var(--teal); }
+  .save-status.err { color: #993C1D; }
+  .history-toggle { text-align: center; font-size: 12px; color: var(--muted); margin-top: 24px; cursor: pointer; text-decoration: underline; }
+  .history-section { margin-top: 16px; display: none; }
+  .history-section.open { display: block; }
+  .history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px; margin-bottom: 8px; }
+  .history-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .history-date { font-size: 12px; font-weight: 500; }
+  .history-pct { font-size: 11px; color: var(--muted); }
+  .history-note { font-size: 12px; color: var(--muted); line-height: 1.4; border-top: 1px solid var(--bg); padding-top: 6px; margin-top: 6px; }
+  .history-empty { font-size: 13px; color: var(--hint); text-align: center; padding: 20px 0; }
+  .del-btn { font-size: 11px; color: var(--hint); cursor: pointer; background: none; border: none; padding: 0; text-decoration: underline; }
+  .del-btn:hover { color: #993C1D; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <div class="header">
+    <div>
+      <div class="header-title">每日打卡</div>
+      <div class="header-date" id="hdate"></div>
+    </div>
+    <div class="day-badge badge-deep" id="badge">深度成长日</div>
+  </div>
+
+  <div class="day-tabs">
+    <div class="day-tab active" onclick="switchDay('deep',this)">🧠 深度成长日</div>
+    <div class="day-tab" onclick="switchDay('system',this)">🧩 系统管理日</div>
+    <div class="day-tab" onclick="switchDay('connect',this)">🤝 对外连接日</div>
+    <div class="day-tab" onclick="switchDay('rest',this)">🌿 低结构恢复日</div>
+  </div>
+
+  <div id="checklist-area"></div>
+
+  <div class="card">
+    <div class="card-label">日常固定锚点</div>
+    <div class="anchor-grid">
+      <div class="anchor-tile" id="a-body" onclick="toggleAnchor('body')">
+        <div class="anchor-icon">🏃</div>
+        <div class="anchor-name">身体锚</div>
+        <div class="anchor-desc">运动 ≥30分钟</div>
+      </div>
+      <div class="anchor-tile" id="a-input" onclick="toggleAnchor('input')">
+        <div class="anchor-icon">📖</div>
+        <div class="anchor-name">输入锚</div>
+        <div class="anchor-desc">高质量阅读 ≥1小时</div>
+      </div>
+      <div class="anchor-tile" id="a-record" onclick="toggleAnchor('record')">
+        <div class="anchor-icon">✏️</div>
+        <div class="anchor-name">记录锚</div>
+        <div class="anchor-desc">今日记录完成</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">今日记录（5–10 分钟）</div>
+    <div class="reflect-row">
+      <div class="reflect-label">今天学到什么</div>
+      <textarea id="r-learn" rows="2" placeholder="今天最重要的一个认知更新…"></textarea>
+    </div>
+    <div class="reflect-row">
+      <div class="reflect-label">今天决策是否有效</div>
+      <textarea id="r-decision" rows="2" placeholder="回顾一个决策，逻辑是否成立…"></textarea>
+    </div>
+    <div class="reflect-row">
+      <div class="reflect-label">这个系统的真实效果</div>
+      <textarea id="r-system" rows="2" placeholder="今日节奏如何？有哪里需要调整…"></textarea>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span class="progress-num" id="prog-text">完成 0 / 0 项</span>
+      <span class="progress-pct" id="prog-pct">0%</span>
+    </div>
+    <div class="bar-bg"><div class="bar-fill" id="bar" style="width:0%"></div></div>
+  </div>
+
+  <button class="save-btn" id="save-btn" onclick="saveEntry()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+    保存到 Google Sheets
+  </button>
+  <div class="save-status" id="save-status"></div>
+
+  <div class="history-toggle" onclick="toggleHistory()">查看本地历史记录 ▾</div>
+  <div class="history-section" id="history-section"></div>
+
+</div>
+<script>
+const SHEET_ID = '1kQ1O6domq8OwWnZ6jzOK76mKMcnm6v-WAQNbxF6Hzzk';
+
+const DAYS = {
+  deep: {
+    label: '深度成长日', badge: 'badge-deep',
+    blocks: [
+      { time: '上午', title: '深度学习', items: ['选定一个认知主题（投资/宏观/心理模型/新领域）','1–2小时不切换任务的深度学习','不做其他任务切换'] },
+      { time: '中午', title: '身体充电', items: ['运动（快走 / 健身 / 游泳）'] },
+      { time: '下午', title: '应用输出', items: ['把上午内容"用出来"（写总结/做模型）','看投资组合结构','做小实验'] },
+      { time: '晚上', title: '轻量输入', items: ['阅读 / 长内容 / 长期兴趣','不做决策类事情'] }
+    ]
+  },
+  system: {
+    label: '系统管理日', badge: 'badge-system',
+    blocks: [
+      { time: '上午', title: '投资与系统', items: ['查看资产结构','调整策略（非频繁交易）','宏观信息过滤（只看关键）'] },
+      { time: '中午', title: '运动放松', items: ['运动 + 放松'] },
+      { time: '下午', title: '生活管理', items: ['行程整理','学习计划调整','健康检查/预约/基础事务'] },
+      { time: '晚上', title: '完全轻松', items: ['娱乐 / 社交 / 电影','不创造，只维护系统稳定'] }
+    ]
+  },
+  connect: {
+    label: '对外连接日', badge: 'badge-connect',
+    blocks: [
+      { time: '核心', title: '今日接触', items: ['与高质量朋友见面','参加小型圈子 / 活动','与行业/投资相关的人交流'] },
+      { time: '原则', title: '过滤规则', items: ['不做无意义社交','只做有信息密度的接触','目标：更新世界模型'] }
+    ]
+  },
+  rest: {
+    label: '低结构恢复日', badge: 'badge-rest',
+    blocks: [
+      { time: '允许', title: '今日可做', items: ['睡到自然醒','随意阅读','散步','兴趣探索','发呆'] },
+      { time: '禁止', title: '今日不做', items: ['不做复杂决策','不做投资操作','不做高认知压力任务'] }
+    ]
+  }
+};
+
+let currentDay = 'deep';
+let checks = {};
+let anchors = { body: false, input: false, record: false };
+
+function switchDay(type, el) {
+  document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentDay = type;
+  const d = DAYS[type];
+  document.getElementById('badge').className = 'day-badge ' + d.badge;
+  document.getElementById('badge').textContent = d.label;
+  checks = {};
+  render();
+}
+
+function render() {
+  const area = document.getElementById('checklist-area');
+  area.innerHTML = '';
+  DAYS[currentDay].blocks.forEach((block, bi) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    let h = `<div class="time-row"><div class="time-pill">${block.time}</div><div class="time-body"><div class="time-heading">${block.title}</div>`;
+    block.items.forEach((item, ii) => {
+      const k = bi+'-'+ii;
+      h += `<div class="check-item" onclick="toggle('${k}',this)">
+        <div class="box${checks[k]?' on':''}"></div>
+        <span class="item-label${checks[k]?' done':''}">${item}</span>
+      </div>`;
+    });
+    h += '</div></div>';
+    card.innerHTML = h;
+    area.appendChild(card);
+  });
+  updateProgress();
+}
+
+function toggle(k, el) {
+  checks[k] = !checks[k];
+  el.querySelector('.box').classList.toggle('on', checks[k]);
+  el.querySelector('.item-label').classList.toggle('done', checks[k]);
+  updateProgress();
+}
+
+function updateProgress() {
+  const total = document.querySelectorAll('#checklist-area .check-item').length;
+  const done = document.querySelectorAll('#checklist-area .box.on').length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('prog-text').textContent = `完成 ${done} / ${total} 项`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('bar').style.width = pct + '%';
+}
+
+function toggleAnchor(key) {
+  anchors[key] = !anchors[key];
+  document.getElementById('a-'+key).classList.toggle('on', anchors[key]);
+}
+
+async function saveEntry() {
+  const btn = document.getElementById('save-btn');
+  const status = document.getElementById('save-status');
+  btn.disabled = true;
+  status.textContent = '正在保存到 Google Sheets…';
+  status.className = 'save-status';
+
+  const total = document.querySelectorAll('#checklist-area .check-item').length;
+  const done = document.querySelectorAll('#checklist-area .box.on').length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'short'});
+
+  const row = [
+    dateStr,
+    DAYS[currentDay].label,
+    done,
+    total,
+    pct + '%',
+    anchors.body ? '✓' : '✗',
+    anchors.input ? '✓' : '✗',
+    anchors.record ? '✓' : '✗',
+    document.getElementById('r-learn').value || '',
+    document.getElementById('r-decision').value || '',
+    document.getElementById('r-system').value || ''
+  ];
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: `You are a Google Sheets assistant. Append the provided data row to the next empty row in the spreadsheet with ID "${SHEET_ID}", Sheet1. 
+First check if row 1 has headers. If row 1 is empty, write these headers first: 日期, 日类型, 完成项目数, 总项目数, 完成率, 身体锚, 输入锚, 记录锚, 今天学到什么, 今天决策是否有效, 这个系统的真实效果
+Then append the data to the next empty row after any existing data.
+Reply only with "SUCCESS" if done, or "ERROR: reason" if failed.`,
+        messages: [{
+          role: 'user',
+          content: `Append this row to the Google Sheet: ${JSON.stringify(row)}`
+        }],
+        mcp_servers: [{ type: 'url', url: 'https://drivemcp.googleapis.com/mcp/v1', name: 'google-drive' }]
+      })
+    });
+
+    const data = await resp.json();
+    const text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+
+    if (text.includes('SUCCESS') || text.includes('成功') || text.includes('appended') || text.includes('written') || text.includes('added')) {
+      status.textContent = '已保存到 Google Sheets ✓';
+      status.className = 'save-status ok';
+      saveLocal(dateStr, done, total, pct);
+    } else {
+      status.textContent = '保存失败，已备份到本地。请检查 Sheet 权限是否为"任何人可编辑"。';
+      status.className = 'save-status err';
+      saveLocal(dateStr, done, total, pct);
+    }
+  } catch(e) {
+    status.textContent = '网络错误，已备份到本地';
+    status.className = 'save-status err';
+    saveLocal(dateStr, done, total, pct);
+  }
+
+  btn.disabled = false;
+  setTimeout(() => { status.textContent = ''; status.className = 'save-status'; }, 4000);
+}
+
+function saveLocal(dateStr, done, total, pct) {
+  const entry = {
+    id: Date.now(), date: dateStr,
+    dayType: DAYS[currentDay].label,
+    done, total, pct,
+    anchors: {...anchors},
+    reflect: {
+      learn: document.getElementById('r-learn').value,
+      decision: document.getElementById('r-decision').value,
+      system: document.getElementById('r-system').value
+    }
+  };
+  const stored = JSON.parse(localStorage.getItem('growth-log') || '[]');
+  stored.unshift(entry);
+  localStorage.setItem('growth-log', JSON.stringify(stored));
+  if (document.getElementById('history-section').classList.contains('open')) renderHistory();
+}
+
+function toggleHistory() {
+  const sec = document.getElementById('history-section');
+  sec.classList.toggle('open');
+  if (sec.classList.contains('open')) renderHistory();
+}
+
+function renderHistory() {
+  const sec = document.getElementById('history-section');
+  const stored = JSON.parse(localStorage.getItem('growth-log') || '[]');
+  if (!stored.length) {
+    sec.innerHTML = '<div class="history-empty">还没有本地记录</div>';
+    return;
+  }
+  sec.innerHTML = stored.map(e => `
+    <div class="history-item">
+      <div class="history-top">
+        <span class="history-date">${e.date} · ${e.dayType}</span>
+        <span class="history-pct">${e.pct}% 完成</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">
+        身体锚 ${e.anchors.body?'✓':'✗'} &nbsp; 输入锚 ${e.anchors.input?'✓':'✗'} &nbsp; 记录锚 ${e.anchors.record?'✓':'✗'}
+      </div>
+      ${e.reflect.learn ? `<div class="history-note">📝 ${e.reflect.learn}</div>` : ''}
+      <div style="text-align:right;margin-top:8px;"><button class="del-btn" onclick="deleteEntry(${e.id})">删除</button></div>
+    </div>
+  `).join('');
+}
+
+function deleteEntry(id) {
+  let stored = JSON.parse(localStorage.getItem('growth-log') || '[]');
+  stored = stored.filter(e => e.id !== id);
+  localStorage.setItem('growth-log', JSON.stringify(stored));
+  renderHistory();
+}
+
+document.getElementById('hdate').textContent = new Date().toLocaleDateString('zh-CN', {year:'numeric',month:'long',day:'numeric',weekday:'long'});
+render();
+</script>
+</body>
+</html>
