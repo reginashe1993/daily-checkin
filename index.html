@@ -94,6 +94,7 @@
 </head>
 <body>
 <div class="shell">
+  <div style="display:flex;gap:0;margin-bottom:24px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;"><a style="flex:1;padding:9px;font-size:13px;text-align:center;background:var(--purple-light);color:var(--purple);font-weight:500;text-decoration:none;display:block;" href="index.html">📋 每日打卡</a><a style="flex:1;padding:9px;font-size:13px;text-align:center;background:var(--surface);color:var(--muted);text-decoration:none;display:block;" href="stats.html">📊 成长总结</a></div>
   <div class="header">
     <div>
       <div class="header-title">每日打卡</div>
@@ -362,3 +363,9 @@ render();
 </script>
 </body>
 </html>
+<!-- nav patch: add link to stats page -->
+<style>
+.nav-bar { display: flex; gap: 0; margin-bottom: 24px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; }
+.nav-btn { flex: 1; padding: 9px; font-size: 13px; text-align: center; cursor: pointer; background: var(--surface); color: var(--muted); text-decoration: none; display: block; border: none; }
+.nav-btn.active { background: var(--purple-light); color: var(--purple); font-weight: 500; }
+</style>
