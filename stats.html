@@ -107,12 +107,19 @@ async function loadData() {
       dayType: r['日类型'] || '',
       done: Number(r['完成项目数'] || 0),
       total: Number(r['总项目数'] || 0),
-      pct: parseFloat((r['完成率'] || '0').toString().replace('%', '')),
+      pct: (() => {
+        const raw = r['完成率'] || r['完成率%'] || '0';
+        const str = raw.toString().replace('%','').trim();
+        const n = parseFloat(str);
+        return isNaN(n) ? 0 : n;
+      })(),
       body: r['身体锚'] === '✓',
       input: r['输入锚'] === '✓',
       record: r['记录锚'] === '✓',
     })).filter(r => r.date);
 
+    console.log('Raw rows from Sheets:', rows.slice(0,3));
+    console.log('Parsed allData:', allData.slice(0,3));
     document.getElementById('data-range').textContent = `共 ${allData.length} 条记录，来自 Google Sheets`;
     renderAll();
   } catch(e) {
