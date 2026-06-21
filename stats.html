@@ -108,10 +108,10 @@ async function loadData() {
       done: Number(r['完成项目数'] || 0),
       total: Number(r['总项目数'] || 0),
       pct: (() => {
-        const raw = r['完成率'] || r['完成率%'] || '0';
-        const str = raw.toString().replace('%','').trim();
-        const n = parseFloat(str);
-        return isNaN(n) ? 0 : n;
+        const raw = (r['完成率'] || r['完成率%'] || '0').toString().replace('%','').trim();
+        const n = parseFloat(raw);
+        if (isNaN(n)) return 0;
+        return n <= 1 ? Math.round(n * 100) : n;
       })(),
       body: r['身体锚'] === '✓',
       input: r['输入锚'] === '✓',
